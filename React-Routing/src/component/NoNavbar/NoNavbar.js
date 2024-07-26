@@ -1,66 +1,41 @@
-// import React from 'react';
-import React, { useEffect,useState } from 'react';
-import { useLocation } from 'react-router-dom';
-//DISPLAYING NAVBAR FOR SOME CERTAIN PAGES  ONLY
-function NoNavbar({children}) {
-const location = useLocation();
-const[showNavbar,setShowNavbar] = useState(false);
-useEffect(() => {
-  console.log('this is location: ', location.pathname);
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
+function NoNavbar({ children, navbar }) {
+  const location = useLocation();
+  const [showNavbar, setShowNavbar] = useState(true);
+
+  useEffect(() => {
+    console.log("Current location:", location.pathname);
 
     const pathsToHideNavbar = [
-      '/Dashboard',
-      '/ElectricityBillEnquiry',
-      '/Deposit',
-      '/WaterBillEnquiry',
+      '/PinPage',
+      '/PinSetPage',
+      '/dashboard',
+      '/deposit',
+      '/userpage',
+      '/adminpage',
+      '/payment',
+      '/transactionhistory',
+      '/paymentreceipt',
+      '/otpverification',
+      '/admin',
+      '/electricitybillenquiry',
+      '/waterbillenquiry',
+      '/logout',
+      
     ];
-    if (pathsToHideNavbar.includes(location.pathname)) {
-      setShowNavbar(false);
-    }
-    else{
-        setShowNavbar(true);
-    }
 
-    
-},[location]);
+    const path = location.pathname.toLowerCase();
+    setShowNavbar(!pathsToHideNavbar.includes(path));
+  }, [location]);
 
   return (
-    <div>{showNavbar && children}</div>
-  )
+    <div>
+      {showNavbar && navbar}
+      {children}
+    </div>
+  );
 }
 
-export default NoNavbar
-
-
-// import React, { useEffect, useState } from 'react';
-// import { useLocation } from 'react-router-dom';
-
-// //DISPLAYING NAVBAR FOR SOME CERTAIN PAGES ONLY
-// function NoNavbar({ children }) {
-//   const location = useLocation();
-//   const [showNavbar, setShowNavbar] = useState(false);
-
-//   useEffect(() => {
-//     console.log('this is location: ', location.pathname);
-//     const pathsToHideNavbar = [
-//       '/Dashboard',
-//       '/ElectricityBillEnquiry',
-//       '/Deposit',
-//       '/WaterBillEnquiry',
-//       '/Payment'
-//     ];
-
-//     if (pathsToHideNavbar.includes(location.pathname)) {
-//       setShowNavbar(false);
-//     } else {
-//       setShowNavbar(true);
-//     }
-//   }, [location]);
-
-//   return (
-//     <div>{showNavbar && children}</div>
-//   );
-// }
-
-// export default NoNavbar;
+export default NoNavbar;

@@ -1,0 +1,69 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="electricity.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Document</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body { 
+        font-family: Arial, sans-serif; 
+        margin: 0; 
+        padding: 0; 
+      }
+
+      .electricity-bill { 
+        max-width: 600px; 
+        margin: 20px auto; 
+        padding: 20px;
+        border: 1px solid #ddd; 
+        border-radius: 8px; 
+        background-color: #fff; 
+      }
+
+      .electricity-bill h1 { 
+        text-align: center; 
+        color: #333; 
+        font-size: 24px;
+        margin-bottom: 20px; 
+      }
+
+      .electricity-bill ul { 
+        list-style-type: none;
+        padding: 0; 
+      }
+
+      .electricity-bill li { 
+        padding: 10px; 
+        margin-bottom: 10px;
+       
+        border-bottom: 1px solid #eee; 
+      }
+
+      .electricity-bill li:last-child {
+        border-bottom: none; 
+      }
+
+      .electricity-bill li span { 
+        font-weight: bold;
+   
+      }
+
+      
+    </style>
+  </head>
+  <body>
+    <div class="electricity-bill">
+      <h1>ELECTRICITY BILL</h1>
+      <ul class="hero">
+        <li>Customer ID: <span>{{users.customerId}}</span></li>
+        <li>Customer Name: <span>{{users.customerName}}</span></li>
+        <li>Counter No: <span>{{users.counterNo}}</span></li>
+        <li>Total Months: <span>{{users.totalMonths}}</span></li>
+        <li>Date of Enquiry: <span>{{users.dateOfEnquiry}}</span></li>
+        <li>Units: <span>{{users.unit}}</span></li>
+        <li>Total Amount: <span>{{users.total}}</span></li>
+      </ul>
+    </div>
+  </body>
+</html>

@@ -2,15 +2,19 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./../component/WaterBillEnquiry.css";
 import electricity from "./../img/electricity.png";
-import { Link } from 'react-router-dom';
+import back1 from "./assets/back3.avif";
+import { Link, useNavigate } from "react-router-dom";
+
 import axios from "axios";
 const ElectricityBillEnquiry = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     customerName: "",
     customerId: "",
     counterNo: "counter 1",
     totalMonths: "1",
     dateOfEnquiry: "",
+    unit: "",
   });
 
   const handleChange = (e) => {
@@ -24,27 +28,43 @@ const ElectricityBillEnquiry = () => {
     e.preventDefault();
     console.log(form);
     // Add form submission logic here
-    const { customerId, customerName, counterNo, totalMonths, dateOfEnquiry } =
-      form;
+    const {
+      customerId,
+      customerName,
+      counterNo,
+      totalMonths,
+      dateOfEnquiry,
+      unit,
+    } = form;
     if (
       customerId &&
       customerName &&
       counterNo &&
       totalMonths &&
-      dateOfEnquiry
+      dateOfEnquiry &&
+      unit
     ) {
       const submission = await axios
         .post("http://localhost:8000/electricitybill", form)
         .then((response) => {
           if (response.data.status === "success") {
+            const total = response.data.total; // Access the total value from the response
+            const unit = response.data.unit; // Access the total value from the response
+            const customerId = response.data.customerId; // Access the total value from the response
+            const customerName = response.data.customerName; // Access the total value from the response
             alert("Enquiry successful");
+            navigate("/PaymentReceipt", {
+              state: { total, unit, customerId, customerName, dateOfEnquiry },
+            }); // Pass the total value as a prop to the PaymentReceipt component
+
+            // Example usage
           } else {
             alert("Enquiry failed");
           }
         })
         .catch((error) => {
           console.log(error);
-          alert("Registration failed");
+          alert("Enquiry failed");
         });
     } else {
       alert("Invalid entry");
@@ -52,8 +72,11 @@ const ElectricityBillEnquiry = () => {
   };
 
   return (
-    <div className="container mt-3">
-      <div className="card">
+    <div
+      className="container1"
+      style={{ backgroundImage: `url(${back1})`, backgroundSize: "cover" }}
+    >
+      <div className="card1">
         <div className="card-header text-center text-teal-500">
           <img src={electricity} alt="Logo" className="logo-img1" />
           {console.log(form)}
@@ -102,6 +125,18 @@ const ElectricityBillEnquiry = () => {
                 <option value="Tokha">Tokha</option>
               </select>
             </div>
+            <div className="form-group mt-3">
+              <label htmlFor="customerUnit">Total Units:</label>
+              <input
+                type="number"
+                className="form-control small-input"
+                id="customerUnit"
+                name="unit"
+                value={form.unit}
+                onChange={handleChange}
+              />
+            </div>
+
             <div className="form-group mt-1">
               <label htmlFor="totalMonths">Total Months:</label>
               <select
@@ -137,7 +172,6 @@ const ElectricityBillEnquiry = () => {
               />
             </div>
             <div className="d-flex justify-content-center">
-             
               <button type="submit" className="btn btn-primary mt-4">
                 Submit
               </button>

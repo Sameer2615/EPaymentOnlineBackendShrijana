@@ -3,6 +3,7 @@ import "./../component/Register.css";
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import back1 from "./../component/assets/back1.avif";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const Register = () => {
     email: "",
     password: "",
     cpassword: "",
+    token: "",
   });
   const handleChange = (e) => {
     setUser({
@@ -20,43 +22,57 @@ const Register = () => {
   };
   const handlesubmit = async (e) => {
     e.preventDefault();
-  
-    const { name, email, password, cpassword } = user;
-    if (name && email && password && password === cpassword) {
-      const registerr = await axios
+    const { name, email, password, cpassword, contactno, address } = user;
+    if (
+      name &&
+      email &&
+      password &&
+      contactno &&
+      address &&
+      password === cpassword
+    ) {
+      const register = await axios
         .post("http://localhost:8000/Register", user)
         .then((response) => {
           if (response.data.status === "success") {
-            navigate("/Login");
-            alert("Registration successfull");
+            navigate("/OTPVerification");
+            alert("Please check your email for verification");
           } else {
             alert("User already registered");
           }
         })
         .catch((error) => {
-          console.log(error);
+          console.log(error.message);
           alert("Registration failed");
         });
-
-      console.log(registerr.data);
     } else {
-      alert("Invalid entry");
+      alert("Email has been registered already");
     }
   };
 
   return (
-    <div class="flex flex-col justify-between max-w-xl px-4 mx-auto lg:pt-16 lg:flex-row md:px-8 lg:max-w-screen-xl">
-      <div class="pt-16 mb-16 lg:mb-0 lg:pt-32 lg:max-w-lg lg:pr-5">
-        <div class="max-w-xl mb-6">
+    <div
+      className="flex flex-col justify-between max-w-2xl px-4 lg:pt-16 lg:flex-row md:px-8 lg:max-w-full"
+      style={{ backgroundImage: `url(${back1})`, backgroundSize: "cover" }}
+    >
+      <div
+        className="pt-16 mb-16 lg:mb-0 lg:pt-32 lg:max-w-lg lg:pr-5"
+        style={{
+          boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+          padding: "20px",
+          margin: "20px",
+        }}
+      >
+        <div className="max-w-xl mb-6">
           {/* <h2 class="max-w-lg mb-2 font-sans text-3xl font-bold tracking-tight text-gray-900 sm:text-2xl sm:leading-none">
         Register US
       </h2> */}
           {console.log(user)}
           <p class="text-base text-gray-700 md:text-lg">
-            <h1>Simple & Fast Payment</h1>
+            <h1>Simple & Fast Payment.</h1>
           </p>
         </div>
-        <div class="flex items-center">
+        <div className="flex items-center">
           <div class="btn-group">
             <a href="/Register" class="btn btn-dark active" aria-current="page">
               Register Now
@@ -97,6 +113,22 @@ const Register = () => {
               name="cpassword"
               value={user.cpassword}
               placeholder="Confirm password"
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="number"
+              name="contactno"
+              value={user.contactno}
+              placeholder="Phone number"
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="text"
+              name="address"
+              value={user.address}
+              placeholder="Enter address"
               onChange={handleChange}
               required
             />

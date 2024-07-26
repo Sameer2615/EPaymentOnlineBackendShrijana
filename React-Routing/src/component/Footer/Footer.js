@@ -13,19 +13,20 @@ const Footer = () => {
         <p>Whatsapp: +977 9864463468</p>
         <p>Viber:+977 9864463468</p>
         <p>Phone:01-5581224</p>
-        <p>Email: epay@gmail.com</p>
+        <Link to="/ContactUs"><p>Email: epayment2423@gmail.com</p></Link>
+        
     
       </div>
       <div className="footer-section">
         <h3>Locations</h3>
-        <p>Location 1:<br />Siddhipur,Lalitpur<br /></p>
-        <p>Location 2:<br />Balkumari,Lalitpur<br /></p>
+        <p>Location 1:  Siddhipur,Lalitpur</p>
+        <p>Location 2:  Balkumari,Lalitpur</p>
       </div>
       <div className="footer-section">
         <h3>Policy</h3>
         <Link to="/AboutLeadG2" ><p>About Us</p></Link>
        
-        <Link to="/Home"><p>Privacy Policies</p></Link>
+        <Link to="/Privacy"><p>Privacy Policies</p></Link>
          <Link to="/Home"><p>Terms and Security Policies</p></Link>
       </div>
       <div className="footer-bottom">
