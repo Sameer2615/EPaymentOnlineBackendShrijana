@@ -58,8 +58,8 @@ const WaterBillEnquiry = () => {
       customerId &&
       customerName &&
       counterNo &&
-      totalMonths &&
-      dateOfEnquiry
+      totalMonths 
+      
     ) {
       const submission = await axios
         .post("http://localhost:8000/waterbill", {
@@ -67,7 +67,7 @@ const WaterBillEnquiry = () => {
           customerName,
           counterNo,
           totalMonths,
-          dateOfEnquiry,
+          
         })
         .then((response) => {
           if (response.data.status === "success") {
@@ -143,6 +143,17 @@ const WaterBillEnquiry = () => {
                 <option value="Tokha">Tokha</option>
               </select>
             </div>
+            <div className="form-group mt-3">
+              <label htmlFor="customerUnit">Customer Unit:</label>
+              <input
+                type="value"
+                className="form-control small-input"
+                id="customerUnit"
+                name="customerUnit"
+                value={form.customerUnit}
+                onChange={handleChange}
+              />
+            </div>
             <div className="form-group mt-1">
               <label htmlFor="totalMonths">Total Months:</label>
               <select
@@ -159,17 +170,7 @@ const WaterBillEnquiry = () => {
                 <option value="12">12</option>
               </select>
             </div>
-            <div className="form-group mt-3">
-              <label htmlFor="dateOfEnquiry">Date Of Enquiry:</label>
-              <input
-                type="date"
-                className="form-control"
-                id="dateOfEnquiry"
-                name="dateOfEnquiry"
-                value={form.dateOfEnquiry}
-                onChange={handleChange}
-              />
-            </div>
+
             <div className="d-flex justify-content-center">
               <button type="submit" className="btn btn-primary mt-4">
                 Submit

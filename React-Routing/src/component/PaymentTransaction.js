@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
-import "./../component/PaymentReceipt.css";
+import "./../component/PaymentTransaction.css";
 import back2 from "./../component/assets/back6.avif";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-
-
-const PaymentReceipt = ({}) => {
+const PaymentTransaction= ({}) => {
   const location = useLocation(); // Use the useLocation hook to access the location object
 
   const total = location.state?.total;
@@ -18,7 +16,7 @@ const PaymentReceipt = ({}) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   console.log(dateOfEnquiry);
 
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const callAboutPage = async () => {
     try {
       const response = await axios.get("http://localhost:8000/dashboard", {
@@ -66,7 +64,7 @@ const PaymentReceipt = ({}) => {
         );
         if (response.data.status === "success") {
           const updatedBalancer = response.data.updatedBalancer;
-          navigate("/PinPage", { state: { updatedBalancer, email, total } });
+          navigate("/PinPage", { state: { updatedBalancer, email } });
         } else if (response.data.status === "insufficient") {
           alert("Insufficient Balance");
         } else {
@@ -78,34 +76,14 @@ const PaymentReceipt = ({}) => {
       alert("Payment failed");
     }
   };
-  //OPEN ELECTRICITY.PDF 
-  const navigate = useNavigate;
-
-  const navigateToPdf = async () => {
-    try {
-      const file = await FileReader.readAsDataURL("../Server/pdfs/electricity")
-      const pdfWindow = window.open;
-      pdfWindow.document.write('<iframe src="' + file + '" width="100%" height="1000"></iframe>');
-      // pdfWindow.document.close;
-      // pdfWindow.focus;
-    } catch (error) {
-      console.error(error.message);
-      alert("Failed to open the PDF file")
-    }
-  };
-
   return (
     <div
       className="receipt-container"
       style={{ backgroundImage: `url(${back2})`, backgroundSize: "cover" }}
     >
       <div className="header">
-        {/* <div className="text-lg font-bold md:py-0 py-8 px-3 ">
-        <h2><b></b><span  className="badge bg-teal-500 text-Dark fs-8">E-pay</span></h2>
-        
-        </div> */}
         <div className="pay">
-          <span>Payment through: </span>
+          <span>Transaction From: </span>
           {name}
         </div>
 
@@ -119,18 +97,18 @@ const PaymentReceipt = ({}) => {
           <span className="value">{dateOfEnquiry.toISOString()}</span>
         </div>
         <div className="detail">
-          <span className="label">customerId:</span>
+          <span className="label">Sender:</span>
           <span className="value">
             <span className="value">{customerId}</span>
           </span>
         </div>
         <div className="detail">
-          <span className="label">customerName:</span>
+          <span className="label">Receiver:</span>
           <span className="value">{customerName}</span>
         </div>
         <div className="detail">
           <span className="label">Service Name:</span>
-          <span className="value">BillPayment</span>
+          <span className="value">Send Money</span>
         </div>
         <div className="detail">
           <span className="label">Amount (NPR):</span>
@@ -151,14 +129,11 @@ const PaymentReceipt = ({}) => {
       <hr />
       <div className="download-button-container">
         <button onClick={handleSubmit} className="download-button">
-          Pay Now
-        </button>
-        <button onClick={navigateToPdf} className="download-button1">
-          Download Receipt
+          Send
         </button>
       </div>
     </div>
   );
 };
 
-export default PaymentReceipt;
+export default PaymentTransaction;

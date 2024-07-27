@@ -1,15 +1,40 @@
 import React from "react";
 import "./../component/UpdateUserInfo.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import back1 from "./../component/assets/back1.avif";
+import Swal from "sweetalert2";
 
 const UpdateUserInfo = () => {
+  const [userdata, setuserdata] = useState({});
   const navigate = useNavigate();
+  const callAboutPage = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/dashboard", {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      });
+      const data = await response.data;
+      console.log(data);
+      setuserdata(data);
+      if (response.status !== 200) {
+        throw new Error("Request failed");
+      }
+    } catch (error) {
+      console.error(error);
+      navigate("/Login");
+    }
+  };
+
+  useEffect(() => {
+    callAboutPage();
+  }, []);
   const [user, setUser] = useState({
     name: "",
-    email: "",
     password: "",
     cpassword: "",
     token: "",
@@ -22,10 +47,10 @@ const UpdateUserInfo = () => {
   };
   const handlesubmit = async (e) => {
     e.preventDefault();
-    const { name, email, password, cpassword, contactno, address } = user;
+    const { name, password, cpassword, contactno, address } = user;
+    const email = userdata.email;
     if (
       name &&
-      email &&
       password &&
       contactno &&
       address &&
@@ -33,19 +58,32 @@ const UpdateUserInfo = () => {
       password === cpassword
     ) {
       const register = await axios
-        .post("http://localhost:8000/Register", user)
+        .post("http://localhost:8000/updateuser", {
+          name,
+          email,
+          contactno,
+          address,
+          cpassword,
+          password,
+          cpassword,
+        })
         .then((response) => {
           if (response.data.status === "success") {
-            navigate("/PinSetPage", {
-              state: { name, email, password, contactno, address },
+            Swal.fire({
+              title: "Update Alert",
+              text: "Update succesfull",
+              icon: "success",
+              confirmButtonText: "OK",
             });
+
+            navigate("/Dashboard");
           } else {
             alert("User already registered");
           }
         })
         .catch((error) => {
           console.log(error.message);
-          alert("Registration failed");
+          alert("Update failed");
         });
     } else {
       alert("Email has been registered already");
@@ -65,26 +103,23 @@ const UpdateUserInfo = () => {
           margin: "20px",
         }}
       >
-        <div className="max-w-xl mb-6">
-          {/* <h2 class="max-w-lg mb-2 font-sans text-3xl font-bold tracking-tight text-gray-900 sm:text-2xl sm:leading-none">
-        Register US
-      </h2> */}
+        {/* <div className="max-w-xl mb-6">
           {console.log(user)}
           <p class="text-base text-gray-700 md:text-lg">
             <h1>Simple & Fast Payment.</h1>
           </p>
-        </div>
-        <div className="flex items-center">
+        </div> */}
+        {/* <div className="flex items-center">
           <div class="btn-group">
             <a href="/Register" class="btn btn-dark active" aria-current="page">
               Register Now
             </a>
           </div>
-        </div>
+        </div> */}
       </div>
       <div className="register-container">
         <div className="register-form">
-          <h2>CREATE ACCOUNT</h2>
+          <h2>Update Your Information</h2>
           <form onSubmit={handlesubmit}>
             <input
               type="text"
@@ -95,18 +130,10 @@ const UpdateUserInfo = () => {
               required
             />
             <input
-              type="email"
-              name="email"
-              value={user.email}
-              placeholder="Enter your Email"
-              onChange={handleChange}
-              required
-            />
-            <input
               type="password"
               name="password"
               value={user.password}
-              placeholder="Password"
+              placeholder="Enter New Password"
               onChange={handleChange}
               required
             />
@@ -119,7 +146,7 @@ const UpdateUserInfo = () => {
               required
             />
             <input
-              type="number"
+              type="value"
               name="contactno"
               value={user.contactno}
               placeholder="Phone number"
@@ -134,18 +161,15 @@ const UpdateUserInfo = () => {
               onChange={handleChange}
               required
             />
-            <div className="terms">
+            {/* <div className="terms">
               <input type="checkbox" id="terms" required />
               <label htmlFor="terms">
                 I agree to all statements in <a href="#">Terms of Service</a>
               </label>
-            </div>
+            </div> */}
 
-            <button type="submit">SIGN UP</button>
+            <button type="submit">Update</button>
           </form>
-          <p>
-            Have already an account? <a href="/Login">Login here</a>
-          </p>
         </div>
       </div>
     </div>
