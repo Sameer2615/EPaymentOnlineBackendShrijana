@@ -68,13 +68,27 @@ const collection2 = new mongoose.model("collection2", Adminschema);
 
 const transactionschema = new mongoose.Schema({
   log: {
-    type: [String],
+    type: String,
     required: true,
   },
 });
-const transaction = new mongoose.model("transaction", transactionschema);
+const transactions = new mongoose.model("transactions", transactionschema);
+
+//For billing
+const Billschema = new mongoose.Schema({
+  customerid: {
+    type: Number,
+    required: true,
+  },
+  customername: {
+    type: String,
+    required: true,
+  },
+});
+const billpays = new mongoose.model("billpays", Billschema);
 module.exports = {
   collection,
   collection2,
-  transaction,
+  transactions,
+  billpays,
 };

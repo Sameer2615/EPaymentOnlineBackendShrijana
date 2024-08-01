@@ -2,7 +2,7 @@ const cors = require("cors");
 const express = require("express");
 const app = express();
 const hbs = require("hbs");
-const { collection, collection2, transaction } = require("./db");
+const { collection, collection2, transactions, billpays } = require("./db");
 
 // const number = require("./db");
 const PORT = 8000;
@@ -232,84 +232,86 @@ app.post("/adminlogin", async (req, res) => {
 });
 
 app.post("/electricitybill", async (req, res) => {
-  const {
-    customerId,
-    customerName,
-    counterNo,
-    totalMonths,
-    unit,
-  } = req.body;
-  function unitcalculate() {
-    let sum = 0;
-    let tax = 0;
-    let total = 0;
-    let ser = 150;
+  const { customerId, customerName, counterNo, totalMonths, unit } = req.body;
+  const customer1 = await billpays.findOne({
+    customerid: customerId,
+  });
+  if (customer1) {
+    function unitcalculate() {
+      let sum = 0;
+      let tax = 0;
+      let total = 0;
+      let ser = 150;
 
-    if (unit <= 100) {
-      sum = unit * 5;
-    } else if (unit <= 200) {
-      sum = 100 * 1 + (unit - 100) * 6;
-    } else if (unit <= 300) {
-      sum = 100 * 1 + 100 * 2 + (unit - 200) * 7;
-    } else if (unit > 300) {
-      sum = 100 * 1 + 100 * 2 + 100 * 3 + (unit - 300) * 8;
+      if (unit <= 100) {
+        sum = unit * 5;
+      } else if (unit <= 200) {
+        sum = 100 * 1 + (unit - 100) * 6;
+      } else if (unit <= 300) {
+        sum = 100 * 1 + 100 * 2 + (unit - 200) * 7;
+      } else if (unit > 300) {
+        sum = 100 * 1 + 100 * 2 + 100 * 3 + (unit - 300) * 8;
+      }
+
+      tax = (sum * 13) / 100;
+      total = sum + ser + tax;
+
+      return total;
     }
-
-    tax = (sum * 13) / 100;
-    total = sum + ser + tax;
-
-    return total;
+    const total = unitcalculate();
+    console.log({
+      customerId,
+      customerName,
+      counterNo,
+      totalMonths,
+      unit,
+      total,
+    });
+    genPDFE(customerId, customerName, counterNo, totalMonths, unit, total);
+    return res.json({
+      status: "success",
+      total: total,
+      customerId: customerId,
+      unit: unit,
+      customerName: customerName,
+    });
+  } else {
+    return res.json({ status: "nocustomer" });
   }
-  const total = unitcalculate();
-  console.log({
-    customerId,
-    customerName,
-    counterNo,
-    totalMonths,
-    unit,
-    total,
-  });
-  genPDFE(
-    customerId,
-    customerName,
-    counterNo,
-    totalMonths,
-    unit,
-    total
-  );
-  return res.json({
-    status: "success",
-    total: total,
-    customerId: customerId,
-    unit: unit,
-    customerName: customerName,
-  });
 });
 app.post("/waterbill", async (req, res) => {
-  const { customerId, customerName, counterNo, totalMonths } =
+  const { customerId, customerName, counterNo, totalMonths, dateOfEnquiry } =
     req.body; // Replace with the actual meter reading
-  let sum1 = 0;
-  let tax1 = 0;
-  let total1 = 0;
-
-  sum1 = totalMonths * 100;
-  tax1 = (sum1 * 10) / 100;
-  total1 = sum1 + tax1;
-  console.log({
-    customerId,
-    customerName,
-    counterNo,
-    totalMonths,
+  const customer1 = await billpays.findOne({
+    customerid: customerId,
   });
+  if (customer1) {
+    let sum1 = 0;
+    let tax1 = 0;
+    let total1 = 0;
 
-  genPDFW(customerId, customerName, counterNo, totalMonths);
-  return res.json({
-    status: "success",
-    total1: total1,
-    customerId: customerId,
-    totalMonths: totalMonths,
-    customerName: customerName,
-  });
+    sum1 = totalMonths * 100;
+    tax1 = (sum1 * 10) / 100;
+    total1 = sum1 + tax1;
+    console.log({
+      customerId,
+      customerName,
+      counterNo,
+      totalMonths,
+      dateOfEnquiry,
+    });
+
+    genPDFW(customerId, customerName, counterNo, totalMonths, dateOfEnquiry);
+    return res.json({
+      status: "success",
+      total1: total1,
+      customerId: customerId,
+      totalMonths: totalMonths,
+      customerName: customerName,
+    });
+  } else {
+    return res.json({ status: "nocustomer" });
+  }
 });
 
 app.post("/verifyotp", async (req, res) => {
@@ -374,10 +376,10 @@ app.post("/deposit", async (req, res) => {
       { $set: { Balance: updatedBalance } }
     );
     let depositlog = `${email} deposited amount of ${amount}`;
-    await transaction.updateOne(
-      { $push: { logs: depositlog } },
-      { upsert: true, new: true } // Create a new document if none exists
-    );
+    let log = {
+      log: depositlog,
+    };
+    await transactions.insertMany([log]);
     res.status(200).json({ status: "success", updatedBalance });
   } else {
     res.status(404).json({ status: "error", message: "User not found" });
@@ -401,10 +403,6 @@ app.post("/transaction", async (req, res) => {
     const userS = await collection.findOne({
       email: email,
     });
-    if (userR && userR.Balance == "null") {
-      userR.Balance = 0;
-    }
-    console.log(userR.Balance);
     if (userS.Balance <= 0) {
       return res
         .status(200)
@@ -413,20 +411,21 @@ app.post("/transaction", async (req, res) => {
       const updatedBalancer = Number(userR.Balance) + Number(amount);
       const updatedBalances = Number(userS.Balance) - Number(amount);
       if (userS) {
-        await collection.updateOne(
-          { email: receiveremail },
-          { $set: { Balance: updatedBalancer } }
-        );
-        await collection.updateOne(
-          { email: email },
-          { $set: { Balance: updatedBalances } }
-        );
+        // await collection.updateOne(
+        //   { email: receiveremail },
+        //   { $set: { Balance: updatedBalancer } }
+        // );
+        // await collection.updateOne(
+        //   { email: email },
+        //   { $set: { Balance: updatedBalances } }
+        // );
         res.status(200).json({
           status: "success",
-          totalR: updatedBalancer.Balance,
-          total: updatedBalances.Balance,
+          totalR: updatedBalancer,
+          totalS: updatedBalances,
           emailR: receiveremail,
           emailS: email,
+          total: amount,
         });
       } else {
         res.status(404).json({ status: "error", message: "User not found" });
@@ -434,6 +433,29 @@ app.post("/transaction", async (req, res) => {
     }
   } else {
     res.status(200).json({ status: "same account" });
+  }
+});
+
+//transfer pin
+app.post("/transferpin", async (req, res) => {
+  const { tpin, emailR, emailS, totalR, totalS } = req.body;
+  const userR = await collection.findOne({
+    email: emailS,
+  });
+  console.log(totalS);
+  console.log(totalR);
+  if (Number(userR.Pin) === Number(tpin)) {
+    await collection.updateOne(
+      { email: emailR },
+      { $set: { Balance: totalR } }
+    );
+    await collection.updateOne(
+      { email: emailS },
+      { $set: { Balance: totalS } }
+    );
+    res.status(200).json({ status: "success" });
+  } else {
+    res.status(200).json({ status: "incorrect", message: "Incorrect pin" });
   }
 });
 
@@ -502,6 +524,7 @@ app.post("/setuppin", async (req, res) => {
 app.post("/transactionpin", async (req, res) => {
   const { tpin, email, updatedBalancer, total } = req.body;
   console.log(updatedBalancer);
+  console.log(total);
   const userR = await collection.findOne({
     email: email,
   });
